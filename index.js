@@ -6,7 +6,7 @@ const nedb = require('nedb');
 const express = require('express');
 const app = express();
 
-var indexStart, indexEnd;
+let indexStart, indexEnd;
 
 fs.readFile(path.join(__dirname, '/indexStart.html'), {encoding: 'utf-8'}, function(err, data) {
         if (err) {
@@ -27,39 +27,33 @@ fs.readFile(path.join(__dirname , '/indexEnd.html'), {encoding: 'utf-8'}, functi
 const port = process.env.PORT || 8080;
 
 const db = new nedb({
-	filename: 'messages.db',
+	filename: 'moods.db',
 	autoload: true,
 	timestampData: true
 });
 
-app.use(express.urlencoded());
-
-const htmlify = function(moods) {
-    let newMoods = [];
-    if (moods) {
-        moods.forEach(function(mood) {
-              newMoods.push('<li>' + mood.moodRating + '</li>');
-        });  
-    } else {
-        console.log('Error: no values found in: ' + moods);
-    }
-    return newMoods;
-}
+app.use(express.urlencoded({extended: true}));
 
 app.get('/', function(req, res) {
-        let moods = [];
-        db.find({}, function (err, data) {
-                if (err) {
+        db.find({}).sort({createdAt: -1}).exec(function (err, docs) {
+            if (err) {
                     console.log(err);
-                } else {
-                    console.log('Mood found: ' + data.mood);
-                    moods.push('<li>' + data.moodRating + '</li>');
+            } else {
+                if (docs) {
+                    let moods = [];
+                    docs.forEach(function (mood) {
+                        let date = mood.createdAt;
+                        let end = date.getHours();
+                        let start = end - 2 < 0 ? 24 + (end - 2):(end - 2);
+                        date = date.toDateString();
+                        moods.push('<li class="list-group-item d-flex justify-content-between align-items-center">Time: ' + start + ':00-' + end + ':00, ' + mood.createdAt.toDateString() + '<span class="badge badge-primary badge-pill">' + mood.mood + '</span></li>');
+                    });
+                    let page = indexStart + moods.join(' ') + indexEnd;
+                    res.send(page);
                 }
-            });
-        let page = indexStart + moods.join('/n') + indexEnd;
-        console.log(moods);
-        console.log(page);
-        res.send(page);
+            }
+        });
+        
     });
 
 app.post('/', function(req, res) {
@@ -73,6 +67,11 @@ app.post('/', function(req, res) {
                     }
                 });
         }
+        res.redirect('/');
+    });
+
+app.post('/delete', function (req, res) {
+        db.remove({}, {multi: true});
         res.redirect('/');
     });
 
