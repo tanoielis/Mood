@@ -4,6 +4,8 @@
   "description": "Reminders to record your mood.",
   "main": "index.js",
   "scripts": {
+    "start": "npm start index.js",
+    "dev": "nodemon start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Eli Tanoi",
@@ -11,5 +13,8 @@
   "dependencies": {
     "express": "^4.16.3",
     "nedb": "^1.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.17.4"
   }
 }
