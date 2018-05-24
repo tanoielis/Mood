@@ -4,7 +4,6 @@
   "description": "Reminders to record your mood.",
   "main": "index.js",
   "scripts": {
-    "start": "npm start index.js",
     "dev": "nodemon start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
