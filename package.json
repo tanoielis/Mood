@@ -5,15 +5,14 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon start",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "author": "Eli Tanoi",
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.3",
     "mongodb": "^3.1.0-beta4",
-    "nconf": "^0.10.0",
-    "nedb": "^1.8.0"
+    "nconf": "^0.10.0"
   },
   "devDependencies": {
     "nodemon": "^1.17.4"
