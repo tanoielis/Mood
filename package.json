@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.3",
+    "mongodb": "^3.1.0-beta4",
+    "nconf": "^0.10.0",
     "nedb": "^1.8.0"
   },
   "devDependencies": {
