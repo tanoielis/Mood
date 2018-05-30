@@ -28,6 +28,9 @@ router.post('/', function(req, res, next) {
 });
 
 router.get('/profile', function(req, res, next) {
+                   return res.send(
+
+router.get('/mood', function(req, res) {
     User.findById(req.session.userId);
         .exec(function (error, user) {
             if (error) {
@@ -38,36 +41,44 @@ router.get('/profile', function(req, res, next) {
                     err.status = 400;
                     return next(err);
                 } else {
-                    return res.send(
-
-router.get('/mood', function(req, res) {
-            dbo.collection('moods').find().sort({createdAt: -1}).toArray(function (err, docs) {
-                if (err) {
-                        console.log(err);
-                } else {
-                    if (docs) {
-                        let moods = [];
-                        docs.forEach(function (mood) {
-                            if ('createdAt' in mood === false) {
-                                console.error('Depricated mood in database ' + JSON.stringify(mood));
-                                return;
+                    dbo.collection('moods').find().sort({createdAt: -1}).toArray(function (err, docs) {
+                        if (err) {
+                                console.log(err);
+                        } else {
+                            if (docs) {
+                                let moods = [];
+                                docs.forEach(function (mood) {
+                                    if ('createdAt' in mood === false) {
+                                        console.error('Depricated mood in database ' + JSON.stringify(mood));
+                                        return;
+                                    }
+                                    let date = mood.createdAt;
+                                    let start = new Date (date.getTime());
+                                    start.setHours(mood.start.substr(0, 2));
+                                    let end = new Date(start.getTime());
+                                    end.addHours(2);
+                                    moods.push('<li class="list-group-item d-flex justify-content-between align-items-center">Time: ' + start.getHours() + '-' + end.getHours() + ', ' + date.toDateString() + '<span class="badge badge-primary badge-pill">' + mood.mood + '</span></li>');
+                                });
+                                let page = indexStart + moods.join(' ') + indexEnd;
+                                    res.send(page);
                             }
-                            let date = mood.createdAt;
-                            let start = new Date (date.getTime());
-                            start.setHours(mood.start.substr(0, 2));
-                            let end = new Date(start.getTime());
-                            end.addHours(2);
-                            moods.push('<li class="list-group-item d-flex justify-content-between align-items-center">Time: ' + start.getHours() + '-' + end.getHours() + ', ' + date.toDateString() + '<span class="badge badge-primary badge-pill">' + mood.mood + '</span></li>');
-                        });
-                        let page = indexStart + moods.join(' ') + indexEnd;
-                        res.send(page);
-                    }
+                        }
+                    });
                 }
             });
-            
-        });
     
 router.post('/mood', function(req, res) {
+    User.findById(req.session.userId);
+        .exec(function (error, user) {
+            if (error) {
+                return next(error);
+            } else {
+                if (user === null) {
+                    let err = new Error('Not authorized!');
+                    err.status = 400;
+                    return next(err);
+                } else {
+ 
             if ('moodRating' in req.body && 'startTime' in req.body) {
                 let moodRating = req.body.moodRating;
                 let startTime = req.body.startTime;
@@ -81,10 +92,23 @@ router.post('/mood', function(req, res) {
                     });
             }
             res.redirect('/mood');
+            }
         });
     
 router.post('/mood/delete', function (req, res) {
+    User.findById(req.session.userId);
+        .exec(function (error, user) {
+            if (error) {
+                return next(error);
+            } else {
+                if (user === null) {
+                    let err = new Error('Not authorized!');
+                    err.status = 400;
+                    return next(err);
+                } else {
+ 
             let deletables = req.body.delete || {};
             dbo.collection('moods').remove(deletables, false);
             res.redirect('/mood');
+            }
         });
