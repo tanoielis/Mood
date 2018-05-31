@@ -3,9 +3,27 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/userSchema.js');
 
+const authorize(req, res, next, cb)
+    User.findById(req.session.userId);
+        .exec(function (error, user) {
+            if (error) {
+                return next(error);
+            } else {
+                if (user === null) {
+                    let err = new Error('Not authorized!');
+                    err.status = 400;
+                    return next(err);
+                } else {
+                    return cb(req, res);
+                }
+            }
+        });
+    };
+
 router.get('/', function(req, res) {
     return res.sendFile(path.join(__dirname + '/../authenticate.html'));
 });
+
 
 router.post('/', function(req, res, next) {
     // handle log ins
@@ -27,20 +45,15 @@ router.post('/', function(req, res, next) {
     }            
 });
 
-router.get('/profile', function(req, res, next) {
-    User.findById(req.session.userId);
-        .exec(function (error, user) {
-            if (error) {
-                return next(error);
-            } else {
-                if (user === null) {
-                    let err = new Error('Not authorized!');
-                    err.status = 400;
-                    return next(err);
-                } else {
-                    return res.send(
+router.get('/register', function(req, res) {
+        return res.sendFile(path.join(__name + '/../register.html'));
+    });
 
-router.get('/mood', function(req, res) {
+router.post('/register', function(req, res) {
+        
+    });
+
+const mood = function(req, res) {    
             dbo.collection('moods').find().sort({createdAt: -1}).toArray(function (err, docs) {
                 if (err) {
                         console.log(err);
@@ -65,26 +78,38 @@ router.get('/mood', function(req, res) {
                 }
             });
             
-        });
-    
-router.post('/mood', function(req, res) {
-            if ('moodRating' in req.body && 'startTime' in req.body) {
-                let moodRating = req.body.moodRating;
-                let startTime = req.body.startTime;
-                let date = new Date();
-                console.log(date);
-                let options = {mood:moodRating,start:startTime,createdAt:date};
-                dbo.collection('moods').insert(options, function (err) {
-                        if(err) {
-                            console.log(err);
-                        }
-                    });
+        };
+ 
+router.get('/mood', function(req, res, next) {
+        authorize(req, res, next, mood);
+   };
+
+const addMood = function(req, res) {
+    if ('moodRating' in req.body && 'startTime' in req.body) {
+        let moodRating = req.body.moodRating;
+        let startTime = req.body.startTime;
+        let date = new Date();
+        console.log(date);
+        let options = {mood:moodRating,start:startTime,createdAt:date};
+        dbo.collection('moods').insert(options, function (err) {
+            if(err) {
+                console.log(err);
             }
-            res.redirect('/mood');
         });
-    
-router.post('/mood/delete', function (req, res) {
-            let deletables = req.body.delete || {};
-            dbo.collection('moods').remove(deletables, false);
-            res.redirect('/mood');
-        });
+    }
+    res.redirect('/mood');
+       });
+
+router.post('/mood', function (req, res, next) {
+        authorize(req, res, next, addMood);
+    });
+
+const deleteMoods = function (req, res) {
+        let deletables = req.body.delete || {};
+        dbo.collection('moods').remove(deletables, false);
+        res.redirect('/mood');
+    });
+
+router.post('/mood/delete', function (req, res, next) {
+        authorize(req, res, next, deleteMoods);
+    });
