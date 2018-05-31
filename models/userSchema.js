@@ -12,8 +12,18 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+    email: {
+        type: String,
+        unique: true,
+        require: true,
+        trim: true
     }
 });
+
+UserSchema.statics.register = function(username, password, email, cb) {
+    
+}
 
 //authenticate input against database
 UserSchema.statics.authenticate = function(username, password, callback) {

@@ -27,10 +27,10 @@ router.get('/', function(req, res) {
 
 router.post('/', function(req, res, next) {
     // handle log ins
-    if ('user' in req.body && 'password' in req.body) {
+    if ('username' in req.body && 'password' in req.body) {
         User.authenticate(req.body.user, req.body.password, function(error, user) {
             if(error || !user) {
-                let err = new Error('Wrong email or password.');
+                let err = new Error('Wrong username or password.');
                 err.status = 401;
                 return next(err);
             } else {
@@ -46,12 +46,14 @@ router.post('/', function(req, res, next) {
 });
 
 router.get('/register', function(req, res) {
-        return res.sendFile(path.join(__name + '/../register.html'));
-    });
+    return res.sendFile(path.join(__name + '/../register.html'));
+});
 
 router.post('/register', function(req, res) {
-        
-    });
+    if ('username' in req.body && 'password' in req.body && 'email' in req.body) {
+        User.register(req.body.username, req.body.password, req.body.email);
+    }
+});
 
 const mood = function(req, res) {    
             dbo.collection('moods').find().sort({createdAt: -1}).toArray(function (err, docs) {
