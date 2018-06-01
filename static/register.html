@@ -6,18 +6,21 @@
     <body>
         <div class="container">
             <form action="/register" method="post">
-                <di
                 <div class="form-group">
                     <label for="name">Username</label>
-                    <input class="" type="text" id="name" name="username"  placeholder="Usermame">
+                    <input class="form-control" type="text" id="name" name="username"  placeholder="Username">
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input class="" type="email" id="email" name="email" placeholder="name@example.com"> 
+                    <input class="form-control" type="email" id="email" name="email" placeholder="name@example.com"> 
                 </div>
-                <div>
+                <div class="form-group">
                     <label for="password">Password</label>
-                    <input class="" type="password" id="password" name="password">
+                    <input class="form-control" type="password" id="password" name="password">
+                </div>
+                <div class="form-group">
+                    <label for="passwordConf">Confirm Password</label>
+                    <input class="form-control" type="password" id="passwordConf" name="passwordConf">
                 </div>
                 <button type="submit">Submit</button>
             </form>
