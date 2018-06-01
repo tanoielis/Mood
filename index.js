@@ -1,11 +1,16 @@
 'use strict'
-const fs = require('fs');
+// nodejs
 const path = require('path');
-const mongodb = require('mongodb');
+// app
 const express = require('express');
+const session = require('express-session');
 const app = express();
+// database
 const nconf = require('nconf');
-
+const mongodb = require('mongodb');
+const mongoose = require('mongoose');
+const MongoStore = require('connect-mongo')(session);
+// config
 nconf.argv()
     .env()
     .file('keys.json');
@@ -13,48 +18,64 @@ nconf.argv()
 const user = nconf.get('mongoUser');
 const pass = nconf.get('mongoPass');
 const host = nconf.get('mongoHost');
-const port = nconf.get('mongoPort');
+const mPort = nconf.get('mongoPort');
+const port = process.env.port || 8080;
+const secret = nconf.get('secret');
+
 
 Date.prototype.addHours=function(h){
     this.setTime(this.getTime()+(h*3600000));
     return this;
 };
 
-let uri = `mongodb://${user}:${pass}@${host}:${port}`;
+let uri = `mongodb://${user}:${pass}@${host}:${mPort}`;
 if (nconf.get('mongoDatabase')) {
   uri = `${uri}/${nconf.get('mongoDatabase')}`;
 }
 console.log('Connecting to db: ' + uri);
 
-mongodb.MongoClient.connect(uri, {useNewUrlParser:true}, (err, db) => {
-    if (err) {
-        throw err;
-    };
+mongoose.connect(uri);
+const db = mongoose.connection;
 
-    let indexStart, indexEnd;
+db.on('error', console.error.bind(console, 'Connection error:'));
 
-    fs.readFile(path.join(__dirname, '/indexStart.html'), {encoding: 'utf-8'}, function(err, data) {
-            if (err) {
-                console.log(err)
-            } else {
-                indexStart = data;
-            }
-        });
-    
-    fs.readFile(path.join(__dirname , '/indexEnd.html'), {encoding: 'utf-8'}, function(err, data) {
-            if (err) {
-                console.log(err);
-            } else {
-                indexEnd = data;
-            }
-        });
-    
-    const port = process.env.PORT || 8080;
-    
-    const dbo = db.db("moodreminder"); 
-    dbo.createCollection('moods');
+db.once('open', function () {
 
+    // Hold session info
+    app.use(session({
+        secret: secret,
+        resave: true,
+        saveUninitialized: false,
+        store: new MongoStore({
+            mongooseConnection: db
+        })
+    }));
+    // Parse form info
     app.use(express.urlencoded({extended: true}));
+<<<<<<< HEAD
+    app.use(express.json());
+    // Serve static files from static folder
+    app.use(express.static(__dirname + '/static'));
+    // Add router
+    const routes = require('./routes/router');
+    routes.loadIndexModel();
+    app.use('/', routes);
+
+    // Catch 404
+    app.use(function(req, res, next) {
+        let err = new Error('File Not Found');
+        err.status = 404;
+        next(err);
+    });
+
+    // Error handler
+    app.use(function (err, req, res, next) {
+        res.status(err.status || 500);
+        res.send(err.message);
+    });
+
+    app.listen(port, () => console.log(`Started server on port ${port}!`));
+=======
     
     app.get('/', function(req, res) {
             dbo.collection('moods').find().sort({createdAt: -1}).toArray(function (err, docs) {
@@ -106,4 +127,5 @@ mongodb.MongoClient.connect(uri, {useNewUrlParser:true}, (err, db) => {
         });
     
         app.listen(port, () => console.log(`Started server on port ${port}!`));
+>>>>>>> master
 });
