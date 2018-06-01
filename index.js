@@ -20,6 +20,7 @@ const pass = nconf.get('mongoPass');
 const host = nconf.get('mongoHost');
 const mPort = nconf.get('mongoPort');
 const port = process.env.port || 8080;
+const secret = nconf.get('secret');
 
 
 Date.prototype.addHours=function(h){
@@ -42,7 +43,7 @@ db.once('open', function () {
 
     // Hold session info
     app.use(session({
-        secret: 'really long secret code',
+        secret: secret,
         resave: true,
         saveUninitialized: false,
         store: new MongoStore({

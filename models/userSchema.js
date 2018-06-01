@@ -18,6 +18,10 @@ const UserSchema = new mongoose.Schema({
         unique: true,
         require: true,
         trim: true
+    },
+    active: {
+      type: Boolean,
+      default: false
     }
 });
 

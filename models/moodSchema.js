@@ -17,5 +17,4 @@ const MoodSchema = new mongoose.Schema({
     comment: String
 });
 
-const Mood = mongoose.model('Mood', MoodSchema);
-module.exports = Mood;
+module.exports = MoodSchema;

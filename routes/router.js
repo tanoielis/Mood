@@ -1,11 +1,15 @@
 'use strict';
+// nodejs
 const path = require('path');
 const fs = require('fs');
-
+// app
 const express = require('express');
 const router = express.Router();
+// db
+const mongoose = require('mongoose');
+// schema's
 const User = require('../models/userSchema.js');
-const Mood = require('../models/moodSchema.js');
+const moodSchema = require('../models/moodSchema.js');
 
 let indexStart, indexEnd;
 
@@ -45,7 +49,6 @@ const authorize = function (req, res, next, cb) {
     };
 
 router.get('/', function(req, res) {
-
     return res.sendFile(path.join(__dirname + '/../static/authenticate.html'));
 });
 
@@ -95,7 +98,14 @@ router.post('/register', function(req, res, next) {
 });
 
 const mood = function(req, res) {
-            Mood.find({}, null, {sort: {createdAt: -1}}, function (err, docs) {
+    User.findById(req.session.userId).exec(function(error, user) {
+        if (error) {
+            console.log(error);
+        } else if (!user.active) {
+            res.redirect('/?n' );
+        } else {
+            let db = mongoose.model('mood-' + user.username, moodSchema);
+            db.find({}, null, {sort: {createdAt: -1}}, function (err, docs) {
                 if (err) {
                         console.log(err);
                 } else {
@@ -117,24 +127,35 @@ const mood = function(req, res) {
                         res.send(page);
                     }
                 }
-            });
-
-        };
+                });
+          }
+        });
+    };
 
 router.get('/mood', function(req, res, next) {
         authorize(req, res, next, mood);
    });
 
 const addMood = function(req, res) {
-    if ('moodRating' in req.body && 'startTime' in req.body) {
-        let moodRating = req.body.moodRating;
-        let startTime = req.body.startTime;
-        let date = new Date();
-        console.log(date);
-        let options = {mood:moodRating,start:startTime,createdAt:date};
-        Mood.create(options, (err) => console.log(err));
-        Mood.save((err) => console.log(err));
-    }
+    User.findById(req.session.userId).exec(function(error, user) {
+        if (error) {
+            console.log('add mood error:');
+            console.error(error);
+        } else {
+            if ('moodRating' in req.body && 'startTime' in req.body) {
+                let moodRating = req.body.moodRating;
+                let startTime = req.body.startTime;
+                let date = new Date();
+                let options = {mood:moodRating,start:startTime,createdAt:date};
+                let db = mongoose.model('mood-'+user.username);
+                db.create(options, function(err) {
+                  if (err) {
+                    console.error(err);
+                  }
+                });
+            }
+        }
+    });
     res.redirect('/mood');
 };
 
@@ -143,9 +164,12 @@ router.post('/mood', function (req, res, next) {
     });
 
 const deleteMoods = function (req, res) {
-        let deletables = req.body.delete || {};
-        Mood.remove(deletables, (err)=>err?console.log(err):console.log('Items deleted'));
-        res.redirect('/mood');
+    User.findById(req.session.userId).exec(function(error, user) {
+            let deletables = req.body.delete || {};
+            let db = mongoose.model('mood-'+user.username);
+            db.removeMany(deletables, (err)=>err?console.log(err):console.log('Items deleted'));
+            res.redirect('/mood');
+        });
     };
 
 router.post('/mood/delete', function (req, res, next) {
