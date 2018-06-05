@@ -120,7 +120,8 @@ const mood = function(req, res) {
                             let start = new Date (date.getTime());
                             start.setHours(mood.start.substr(0, 2));
                             let end = new Date(start.getTime());
-                            end.addHours(2);
+                            let h = 2; // amount of hours to add
+                            end.setTime(end.getTime()+(h*3600000));
                             moods.push('<li class="list-group-item d-flex justify-content-between align-items-center">Time: ' + start.getHours() + '-' + end.getHours() + ', ' + date.toDateString() + '<span class="badge badge-primary badge-pill">' + mood.mood + '</span></li>');
                         });
                         let page = indexStart + moods.join(' ') + indexEnd;

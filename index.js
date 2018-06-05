@@ -22,12 +22,6 @@ const mPort = nconf.get('mongoPort');
 const port = process.env.port || 8080;
 const secret = nconf.get('secret');
 
-
-Date.prototype.addHours=function(h){
-    this.setTime(this.getTime()+(h*3600000));
-    return this;
-};
-
 let uri = `mongodb://${user}:${pass}@${host}:${mPort}`;
 if (nconf.get('mongoDatabase')) {
   uri = `${uri}/${nconf.get('mongoDatabase')}`;
