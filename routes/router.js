@@ -121,7 +121,11 @@ const mood = function(req, res) {
                             start.setHours(mood.start.substr(0, 2));
                             let end = new Date(start.getTime());
                             end.addHours(2);
-                            moods.push('<li class="list-group-item d-flex justify-content-between align-items-center">Time: ' + start.getHours() + '-' + end.getHours() + ', ' + date.toDateString() + '<span class="badge badge-primary badge-pill">' + mood.mood + '</span></li>');
+                            let moodRating = mood.mood;
+                            // table implementation
+                            moods.push('<tr><td>'+start.getHours()+'-'+end.getHours()+'</td><td>'+moodRating+'</td><td>'+date.toDateString()+'</td></tr>');
+                            // list-group implementation 
+                            // moods.push('<li class="list-group-item d-flex justify-content-between align-items-center">Time: ' + start.getHours() + '-' + end.getHours() + ', ' + date.toDateString() + '<span class="badge badge-primary badge-pill">' + mood.mood + '</span></li>');
                         });
                         let page = indexStart + moods.join(' ') + indexEnd;
                         res.send(page);
